@@ -19,7 +19,8 @@ const functions = require('firebase-functions');
 
 // The Firebase Admin SDK to access the Firebase Realtime Database. 
 const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
+//admin.initializeApp(functions.config().firebase);
+admin.initializeApp();
 const fbDbTest1RefUpdate = admin.database().ref('/updates/http');
 const fbDbTest2RefUpdate = admin.database().ref('/updates/db');
 const fbDbTestRefUpdate = admin.database().ref('/updates');
@@ -176,3 +177,47 @@ exports.updates = functions.database
 
   })
 
+// why is issueId not defined?
+/*
+ textPayload:  "{ type: 'type.googleapis.com/firebase.crashlytics.functions.v1.NewIssueEvent',
+  issueId: '5ada56f036c7b2352780a91c',
+  issueTitle: 'FragmentActivity.java line 368',
+  appInfo: 
+   { appName: 'Friendly Eats',
+     appId: 'com.google.firebase.example.fireeats',
+     appPlatform: 'android',
+     latestAppVersion: '1.0 (1)' },
+  createTime: '2018-04-20T21:09:04.603Z',
+  resolvedTime: null,
+  velocityAlert: null }" 
+*/
+
+exports.sendOnNew = functions.crashlytics.issue().onNew(issue => {
+  console.log(issue);
+  const issueId = issue.issueId;
+  const issueTitle = issue.issueTitle;
+  var appInfo = issue.appInfo;
+  const test_message = ` There's a new issue (${issueId}) ` +
+      `in your app - ${issueTitle}`;
+  const app_data = ` Additional: app name: (${appInfo.appName}), app platform (${appInfo.appPlatform}), latestAppVersion: (${appInfo.latestAppVersion})`;
+  //console.log(`Posted new issue ${issueId} successfully to test`);
+  console.log(test_message);
+  console.log(app_data);
+  var promise = Promise.resolve(100);
+  return promise;
+});
+  
+exports.sendOnRegressed = functions.crashlytics.issue().onRegressed(issue => {
+  console.log(issue);
+  const issueId = issue.issueId;
+  const issueTitle = issue.issueTitle;
+  var appInfo = issue.appInfo;
+  const test_message = ` There's a regressed issue (${issueId}) ` +
+      `in your app - ${issueTitle}`;
+  const app_data = ` Additional: app name: (${appInfo.appName}), app platform (${appInfo.appPlatform}), latestAppVersion: (${appInfo.latestAppVersion})`;
+  //console.log(`Posted new issue ${issueId} successfully to test`);
+  console.log(test_message);
+  console.log(app_data);
+  var promise = Promise.resolve(100);
+  return promise;
+});
